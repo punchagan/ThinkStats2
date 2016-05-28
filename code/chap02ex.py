@@ -21,7 +21,8 @@ def Mode(hist):
 
     returns: value from Hist
     """
-    return 0
+
+    return max(hist.Items(), key=lambda x: x[1])[0]
 
 
 def AllModes(hist):
@@ -31,8 +32,15 @@ def AllModes(hist):
 
     returns: iterator of value-freq pairs
     """
-    return []
 
+    return sorted(hist.Items(), key=lambda x: x[1], reverse=True)
+
+def compute_Cohen_d(column_name, live, first, others):
+    """Compute Cohen's Coefficient d for the given column."""
+
+    s = live[column_name].std()
+    d = abs(first[column_name].mean() - others[column_name].mean())/s
+    return d
 
 def main(script):
     """Tests the functions in this module.
@@ -42,7 +50,7 @@ def main(script):
     live, firsts, others = first.MakeFrames()
     hist = thinkstats2.Hist(live.prglngth)
 
-    # test Mode    
+    # test Mode
     mode = Mode(hist)
     print('Mode of preg length', mode)
     assert(mode == 39)
@@ -56,6 +64,11 @@ def main(script):
 
     print('%s: All tests passed.' % script)
 
+    d = compute_Cohen_d('totalwgt_lb', live, firsts, others)
+    print('%s: d for totalwgt_lb' % d)
+
+    d = compute_Cohen_d('prglngth', live, firsts, others)
+    print('%s: d for prglngth' % d)
 
 if __name__ == '__main__':
     main(*sys.argv)
