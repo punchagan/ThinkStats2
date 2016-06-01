@@ -16,16 +16,16 @@ import thinkstats2
 """
 Sample line.
 
-Place Div/Tot  Div   Guntime Nettime  Pace  Name                   Ag S Race# City/state              
-===== ======== ===== ======= =======  ===== ====================== == = ===== ======================= 
-   97  26/256  M4049   42:48   42:44   6:53 Allen Downey           42 M   337 Needham MA 
+Place Div/Tot  Div   Guntime Nettime  Pace  Name                   Ag S Race# City/state
+===== ======== ===== ======= =======  ===== ====================== == = ===== =======================
+   97  26/256  M4049   42:48   42:44   6:53 Allen Downey           42 M   337 Needham MA
 """
 
 def ConvertPaceToSpeed(pace):
     """Converts pace in MM:SS per mile to MPH."""
     m, s = [int(x) for x in pace.split(':')]
     secs = m*60 + s
-    mph  = 1 / secs * 60 * 60 
+    mph  = 1 / secs * 60 * 60
     return mph
 
 
@@ -34,7 +34,7 @@ def CleanLine(line):
     t = line.split()
     if len(t) < 6:
         return None
-    
+
     place, divtot, div, gun, net, pace = t[0:6]
 
     if not '/' in divtot:
@@ -82,15 +82,27 @@ def BinData(data, low, high, n):
     return data
 
 
+def ObservedPmf(pmf, speed):
+    """Return the Pmf as observed by runner at given speed."""
+
+    observed_pmf = pmf.Copy(label='observed speeds')
+
+    for speed_ in observed_pmf.Values():
+        observed_pmf.Mult(speed_, abs(speed_ - speed))
+
+    return observed_pmf
+
+
 def main():
     results = ReadResults()
     speeds = GetSpeeds(results)
 
     speeds = BinData(speeds, 3, 12, 100)
 
-    pmf = thinkstats2.Pmf(speeds, 'speeds')
+    pmf = thinkstats2.Pmf(speeds, label='speeds')
+    observed_pmf = ObservedPmf(pmf, 6.5)
 
-    thinkplot.Pmf(pmf)
+    thinkplot.Pmfs([pmf, observed_pmf])
     thinkplot.Show(title='PMF of running speed',
                    xlabel='speed (mph)',
                    ylabel='probability')
