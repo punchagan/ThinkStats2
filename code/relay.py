@@ -90,6 +90,8 @@ def ObservedPmf(pmf, speed):
     for speed_ in observed_pmf.Values():
         observed_pmf.Mult(speed_, abs(speed_ - speed))
 
+    observed_pmf.Normalize()
+
     return observed_pmf
 
 
